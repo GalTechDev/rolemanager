@@ -328,6 +328,7 @@ async def addrole_slash(ctx: discord.Interaction, role: discord.Role, emote: str
 
 
 @Lib.app.slash(name="removerole", description="retire le role", guild=discord.Object(id=649021344058441739))
+@discord.app_commands.check(Lib.is_in_staff)
 async def removerole_slash(ctx: discord.Interaction, role: discord.Role, message_id:str):
     if not Lib.is_in_staff(ctx, True):
         await ctx.response.send_message("Vous n'avez pas les permissions pour utiliser cette commande.", ephemeral=True)
