@@ -24,8 +24,9 @@ class RoleManager:
         """
         try:
             self.role_database = json.loads(Lib.save.read(self.database_file))
-        except FileNotFoundError:
-            Lib.save.read(self.database_file, mode="x").write(json.dumps("{}", indent=4))
+        except (FileNotFoundError, json.decoder.JSONDecodeError):
+            Lib.save.add_file(self.database_file, over_write=True)
+            Lib.save.write(self.database_file, data=json.dumps({}, indent=4))
 
     def save(self, database):
         """
@@ -290,7 +291,7 @@ async def removeemote(ctx:discord.Interaction, emote):
 # -------------------------------- SLASH COMMANDE -------------------------------
 
 
-@Lib.app.slash(name="addrole", description="liste des commande", guild=discord.Object(id=649021344058441739))
+@Lib.app.slash(name="addrole", description="liste des commande")
 @discord.app_commands.check(Lib.is_in_staff)
 async def addrole_slash(ctx: discord.Interaction, role: discord.Role, emote: str, message_id: str):
     refId = message_id
@@ -327,7 +328,7 @@ async def addrole_slash(ctx: discord.Interaction, role: discord.Role, emote: str
     await ctx.response.send_message(f"{role} à bien été créé avec l'emote {emote}.", ephemeral=True)
 
 
-@Lib.app.slash(name="removerole", description="retire le role", guild=discord.Object(id=649021344058441739))
+@Lib.app.slash(name="removerole", description="retire le role")
 @discord.app_commands.check(Lib.is_in_staff)
 async def removerole_slash(ctx: discord.Interaction, role: discord.Role, message_id:str):
     if not Lib.is_in_staff(ctx, True):
@@ -356,7 +357,7 @@ async def removerole_slash(ctx: discord.Interaction, role: discord.Role, message
     await ctx.response.send_message(f"{role} à bien été retiré du message.", ephemeral=True)
 
 
-@Lib.app.slash(name="removeemote", description="retir l'emote", guild=discord.Object(id=649021344058441739))
+@Lib.app.slash(name="removeemote", description="retir l'emote")
 @discord.app_commands.check(Lib.is_in_staff)
 async def removeemote_slash(ctx: discord.Interaction, emote: str, message_id: str):
     refId = message_id
