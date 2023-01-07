@@ -1,6 +1,6 @@
 from system.lib  import *
 
-
+import discord
 Lib = Lib_UsOS()
 
 app_version = "1.1"
@@ -74,7 +74,7 @@ class Creat_select_view(discord.ui.View):
         roleDB.add_role(interaction.guild, view)
         await valide_intaraction(interaction)
 
-class Creat_select(discord.ui.Select):
+class Creat_select(discord.ui.RoleSelect):
     def __init__(self, liste: list, options) -> None:
         super().__init__(placeholder=f"Choisi tes roles", max_values=len(options), min_values=0, options=options)
         self.roles = liste
