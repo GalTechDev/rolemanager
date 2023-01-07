@@ -34,8 +34,9 @@ class RoleDataBase:
         
         for select in view.children:
             if type(select)==Get_select:
-                self.data[str(guild.id)].update({str(select.custom_id):[option["value"] for option in select.to_component_dict()["options"]]})
-
+                print(select.to_component_dict())
+                self.data[str(guild.id)].update({str(select.custom_id):[str(option["value"]) for option in select.to_component_dict()["options"]]})
+        print(self.data)
         self.save_data()
 
 
@@ -69,16 +70,17 @@ class Creat_select_view(discord.ui.View):
 
     @discord.ui.button(label="Save", style=discord.ButtonStyle.green)
     async def save_button(self, interaction:discord.Interaction, button:discord.ui.Button):
-        view=Get_select_view(interaction.guild, self.roles)
+        view=Get_select_view(self.roles)
         await interaction.response.send_message(content='\u200b', view=view)
         roleDB.add_role(interaction.guild, view)
         await valide_intaraction(interaction)
 
 class Creat_select(discord.ui.RoleSelect):
     def __init__(self, liste: list, options) -> None:
-        super().__init__(placeholder=f"Choisi tes roles", max_values=len(options), min_values=0, options=options)
+        super().__init__(placeholder=f"Choisi tes roles", max_values=len(options), min_values=0)
         self.roles = liste
         self.old = []
+
     async def callback(self, interaction: discord.Interaction):
         for roles in self.values:
             if roles not in self.old:
@@ -91,12 +93,12 @@ class Creat_select(discord.ui.RoleSelect):
         await valide_intaraction(interaction)
 
 class Get_select_view(discord.ui.View):
-    def __init__(self, guild: discord.Guild, roles, timeout=180):
+    def __init__(self, roles, timeout=180):
         super().__init__(timeout=timeout)
         i=0
         options=[]
         for role in roles:
-            options.append(discord.SelectOption(label=f"{guild.get_role(int(role))}", value=role))
+            options.append(discord.SelectOption(label=f"{role}", value=str(role.id)))
             i+=1
             if i==25:
                 i=0
@@ -109,6 +111,7 @@ class Get_select_view(discord.ui.View):
 class Get_select(discord.ui.Select):
     def __init__(self, options) -> None:
         super().__init__(placeholder=f"Choisi tes roles", max_values=len(options), min_values=0, options=options)
+        
 
     async def callback(self, interaction: discord.Interaction):
         return  
@@ -133,4 +136,7 @@ async def on_interaction(interaction: discord.Interaction):
 
 @Lib.app.slash(description="Ajoute un message pour choisir des roles")
 async def add_role(ctx: discord.Interaction):
-    await ctx.response.send_message(content="Select roles :", view=Creat_select_view(ctx.guild), ephemeral=True)
+    try:
+        await ctx.response.send_message(content="Select roles :", view=Creat_select_view(ctx.guild), ephemeral=True)
+    except Exception as error:
+        print(error)
