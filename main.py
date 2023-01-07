@@ -106,7 +106,11 @@ class Get_select_view(discord.ui.View):
                 options=[]
         if options!=[]:
             self.add_item(Get_select(options))
-        
+    
+    @discord.ui.button(label="Edit", style=discord.ButtonStyle.green)
+    async def edit_button(self, interaction:discord.Interaction, button:discord.ui.Button):
+        await valide_intaraction(interaction)
+
 
 class Get_select(discord.ui.Select):
     def __init__(self, options) -> None:
