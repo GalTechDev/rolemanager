@@ -187,9 +187,10 @@ async def on_interaction(interaction: discord.Interaction):
     try:
         if interaction.data["component_type"]==3:
             if roleDB.interaction_existe(interaction):
+                await valide_intaraction(interaction)
                 await interaction.user.add_roles(*[interaction.guild.get_role(int(role)) for role in interaction.data["values"] if int(role) not in [user_role.id for user_role in interaction.user.roles]])
                 await interaction.user.remove_roles(*[interaction.guild.get_role(int(int_role)) for int_role in roleDB.data[str(interaction.guild.id)][str(interaction.data["custom_id"])]["values"] if int_role not in interaction.data["values"]])
-                await valide_intaraction(interaction)
+                
         elif interaction.data["component_type"]==2:
             if Lib.is_in_staff(interaction):
                 if roleDB.edit_existe(interaction):
