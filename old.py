@@ -384,47 +384,45 @@ async def removeemote_slash(ctx: discord.Interaction, emote: str, message_id: st
 
 # ---------------------------------- EVENTS ------------------------------------
 
-def init_event():
+@Lib.event.event()
+async def on_ready():
     role_db.load_db()
-    @Lib.client.event
-    async def on_ready():
-        role_db.load_db()
-        
-
-    @Lib.client.event
-    async def on_raw_reaction_add(ctx):
-        if ctx.user_id == Lib.client.user.id:
-            return
-
-        message_id = str(ctx.message_id)
-        chat_id = ctx.channel_id
-        guild_id = ctx.guild_id
-        # print(ctx.emoji.name)
-
-        guild = discord.utils.find(lambda g: g.id == guild_id, Lib.client.guilds)
-        user = await guild.fetch_member(ctx.user_id)
-
-        val = role_db.is_binded_from_emote(guild_id, chat_id, message_id, ctx.emoji.name)
-
-        if val:
-            role = discord.utils.get(guild.roles, name=val)
-            await user.add_roles(role)
 
 
-    @Lib.client.event
-    async def on_raw_reaction_remove(ctx):
-        if ctx.user_id == Lib.client.user.id:
-            return
+@Lib.event.event()
+async def on_raw_reaction_add(ctx):
+    if ctx.user_id == Lib.client.user.id:
+        return
 
-        guild_id = ctx.guild_id
+    message_id = str(ctx.message_id)
+    chat_id = ctx.channel_id
+    guild_id = ctx.guild_id
+    # print(ctx.emoji.name)
 
-        # guild_id = 550450730192994306
-        guild = discord.utils.find(lambda g: g.id == guild_id, Lib.client.guilds)
-        user = await guild.fetch_member(ctx.user_id)
+    guild = discord.utils.find(lambda g: g.id == guild_id, Lib.client.guilds)
+    user = await guild.fetch_member(ctx.user_id)
 
-        val = role_db.is_binded_from_emote(guild_id, ctx.channel_id, ctx.message_id, ctx.emoji.name)
+    val = role_db.is_binded_from_emote(guild_id, chat_id, message_id, ctx.emoji.name)
 
-        if val:
-            role = discord.utils.get(guild.roles, name=val)
-            await user.remove_roles(role)
+    if val:
+        role = discord.utils.get(guild.roles, name=val)
+        await user.add_roles(role)
+
+
+@Lib.event.event()
+async def on_raw_reaction_remove(ctx):
+    if ctx.user_id == Lib.client.user.id:
+        return
+
+    guild_id = ctx.guild_id
+
+    # guild_id = 550450730192994306
+    guild = discord.utils.find(lambda g: g.id == guild_id, Lib.client.guilds)
+    user = await guild.fetch_member(ctx.user_id)
+
+    val = role_db.is_binded_from_emote(guild_id, ctx.channel_id, ctx.message_id, ctx.emoji.name)
+
+    if val:
+        role = discord.utils.get(guild.roles, name=val)
+        await user.remove_roles(role)
 
