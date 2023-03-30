@@ -4,12 +4,7 @@ from system.lib  import *
 Lib = Lib_UsOS()
 
 app_version = "1.1"
-role_folder = f"role_database.json"
-
-
-
-
-
+role_folder = f"role_database_emote.json"
 
 #----------- class ----------------
 class RoleManager:
@@ -291,7 +286,7 @@ async def removeemote(ctx:discord.Interaction, emote):
 # -------------------------------- SLASH COMMANDE -------------------------------
 
 
-@Lib.app.slash(name="addrole", description="liste des commande")
+@Lib.app.slash(name="add role emote", description="liste des commande")
 @discord.app_commands.check(Lib.is_in_staff)
 async def addrole_slash(ctx: discord.Interaction, role: discord.Role, emote: str, message_id: str):
     refId = message_id
@@ -328,9 +323,9 @@ async def addrole_slash(ctx: discord.Interaction, role: discord.Role, emote: str
     await ctx.response.send_message(f"{role} à bien été créé avec l'emote {emote}.", ephemeral=True)
 
 
-@Lib.app.slash(name="removerole", description="retire le role")
+@Lib.app.slash(name="remove role emote", description="retire le role")
 @discord.app_commands.check(Lib.is_in_staff)
-async def removerole_slash(ctx: discord.Interaction, role: discord.Role, message_id:str):
+async def removerole_slash(ctx: discord.Interaction, role: discord.Role, message_id:str, remove_emote:bool = False):
     if not Lib.is_in_staff(ctx, True):
         await ctx.response.send_message("Vous n'avez pas les permissions pour utiliser cette commande.", ephemeral=True)
         return
@@ -347,6 +342,18 @@ async def removerole_slash(ctx: discord.Interaction, role: discord.Role, message
     except Exception:
         await ctx.response.send_message("Erreur! message_id invalide!", ephemeral=True)
 
+    emotes = role_db.role_database[str(commu)][str(chat)][str(refId)].items()
+    emote = None
+    for emote, r in emotes:
+        if r == str(role):
+            emote=emote
+
+    if emote!=None:
+        try:
+            await role_message.clear_reaction(emote)
+        except:
+            pass
+
     try:
         role_db.remove_role(commu, chat, refId, role_name)
     except Exception:
@@ -357,9 +364,10 @@ async def removerole_slash(ctx: discord.Interaction, role: discord.Role, message
     await ctx.response.send_message(f"{role} à bien été retiré du message.", ephemeral=True)
 
 
-@Lib.app.slash(name="removeemote", description="retir l'emote")
+@Lib.app.slash(name="remove emote", description="retir l'emote")
 @discord.app_commands.check(Lib.is_in_staff)
 async def removeemote_slash(ctx: discord.Interaction, emote: str, message_id: str):
+    ctx.response.send_message()
     refId = message_id
     role_name = emote
     commu = ctx.guild.id
@@ -387,7 +395,7 @@ async def removeemote_slash(ctx: discord.Interaction, emote: str, message_id: st
 @Lib.event.event()
 async def on_ready():
     role_db.load_db()
-
+    
 
 @Lib.event.event()
 async def on_raw_reaction_add(ctx):
